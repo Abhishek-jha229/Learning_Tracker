@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Learning Log</title>
+<link rel="icon" href="data:,">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: #14181C;
+    color: #ECE8E0;
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  body {
+    padding: 40px 20px 64px;
+  }
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .header { margin-bottom: 32px; }
+  .title {
+    font-family: 'Zilla Slab', Georgia, serif;
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    color: #9AA0A6;
+    font-size: 14.5px;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .stats {
+    display: flex;
+    border-top: 1px solid #2A3138;
+    border-bottom: 1px solid #2A3138;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    flex: 1;
+    min-width: 100px;
+    padding: 18px 16px;
+    border-right: 1px solid #2A3138;
+  }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .stat-num.amber { color: #E8A33D; }
+  .stat-label {
+    font-size: 12.5px;
+    color: #9AA0A6;
+    margin-top: 6px;
+  }
+
+  .form-card {
+    background: #191E23;
+    border: 1px solid #2A3138;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 40px;
+  }
+  .today-label {
+    font-size: 12.5px;
+    color: #9AA0A6;
+    margin-bottom: 12px;
+  }
+  .cat-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .cat-btn {
+    flex: 1;
+    padding: 9px 8px;
+    border-radius: 5px;
+    border: 1px solid #2A3138;
+    background: transparent;
+    color: #9AA0A6;
+    font-size: 13.5px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .cat-btn.active { color: #1A1300; font-weight: 500; border-color: transparent; }
+  .cat-btn[data-cat="dsa"].active { background: #E8A33D; }
+  .cat-btn[data-cat="webdev"].active { background: #5FA8A0; }
+  .cat-btn[data-cat="other"].active { background: #8C8577; }
+
+  textarea, input[type="number"] {
+    width: 100%;
+    background: #14181C;
+    border: 1px solid #2A3138;
+    border-radius: 5px;
+    color: #ECE8E0;
+    font-family: inherit;
+    font-size: 14.5px;
+    padding: 10px 12px;
+  }
+  textarea { resize: vertical; min-height: 64px; }
+  textarea:focus, input:focus, .cat-btn:focus {
+    outline: 2px solid #5FA8A0;
+    outline-offset: 1px;
+  }
+  .meta-row { display: flex; gap: 10px; margin-top: 10px; }
+  .meta-row input { flex: 1; }
+
+  .submit-btn {
+    margin-top: 14px;
+    width: 100%;
+    background: #E8A33D;
+    color: #1A1300;
+    border: none;
+    border-radius: 5px;
+    padding: 11px;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .already-logged {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #9AA0A6;
+  }
+
+  .day-label {
+    font-size: 13px;
+    color: #9AA0A6;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .day-group { margin-bottom: 22px; }
+  .entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid #2A3138;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    margin-top: 6px; flex-shrink: 0;
+  }
+  .entry-body { flex: 1; min-width: 0; }
+  .entry-note { font-size: 14.5px; line-height: 1.5; }
+  .entry-meta { font-size: 12px; color: #9AA0A6; margin-top: 3px; }
+  .delete-btn {
+    background: none; border: none; color: #9AA0A6;
+    cursor: pointer; font-size: 13px; padding: 4px 6px; flex-shrink: 0;
+  }
+  .delete-btn:hover { color: #E8785A; }
+
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9AA0A6;
+    font-size: 14.5px;
+    border: 1px dashed #2A3138;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">Learning Log</h1>
+      <p class="subtitle">One line a day on what you actually did — DSA, web dev, or anything else you're building toward.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num amber" id="streakNum">0</div><div class="stat-label">day streak</div></div>
+      <div class="stat"><div class="stat-num" id="dsaNum">0</div><div class="stat-label">DSA sessions</div></div>
+      <div class="stat"><div class="stat-num" id="webdevNum">0</div><div class="stat-label">web dev sessions</div></div>
+      <div class="stat"><div class="stat-num" id="totalNum">0</div><div class="stat-label">total logged</div></div>
+    </div>
+
+    <div class="form-card">
+      <div class="today-label" id="todayLabel"></div>
+      <div class="cat-row">
+        <button class="cat-btn active" data-cat="dsa" onclick="selectCategory('dsa')">DSA</button>
+        <button class="cat-btn" data-cat="webdev" onclick="selectCategory('webdev')">Web Dev</button>
+        <button class="cat-btn" data-cat="other" onclick="selectCategory('other')">Other</button>
+      </div>
+      <textarea id="noteInput" placeholder="What did you work on? e.g. Solved 3 tree problems, or built login form for project" oninput="updateSubmitState()"></textarea>
+      <div class="meta-row">
+        <input type="number" min="0" id="minutesInput" placeholder="Minutes (optional)">
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="addEntry()" disabled>Log today's entry</button>
+      <div id="alreadyLoggedMsg"></div>
+    </div>
+
+    <div id="entriesContainer"></div>
+  </div>
+
+<script>
+  const CATEGORIES = {
+    dsa: { label: "DSA", color: "#E8A33D" },
+    webdev: { label: "Web Dev", color: "#5FA8A0" },
+    other: { label: "Other", color: "#8C8577" },
+  };
+  const STORAGE_KEY = "learning-log-entries";
+  let selectedCategory = "dsa";
+
+  function todayStr() {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 10);
+  }
+
+  function formatDateLabel(dateStr) {
+    const d = new Date(dateStr + "T00:00:00");
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const diffDays = Math.round((today - d) / 86400000);
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    return d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+  }
+
+  function loadEntries() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveEntries(entries) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }
+
+  function computeStreak(entries) {
+    if (entries.length === 0) return 0;
+    const days = new Set(entries.map(e => e.date));
+    let streak = 0;
+    let cursor = new Date();
+    cursor.setHours(0,0,0,0);
+    const cursorStr = () => {
+      const d = new Date(cursor);
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      return d.toISOString().slice(0,10);
+    };
+    if (!days.has(cursorStr())) {
+      cursor.setDate(cursor.getDate() - 1);
+      if (!days.has(cursorStr())) return 0;
+    }
+    while (days.has(cursorStr())) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return streak;
+  }
+
+  function selectCategory(cat) {
+    selectedCategory = cat;
+    document.querySelectorAll(".cat-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.cat === cat);
+    });
+  }
+
+  function updateSubmitState() {
+    const note = document.getElementById("noteInput").value.trim();
+    document.getElementById("submitBtn").disabled = note.length === 0;
+  }
+
+  function addEntry() {
+    const note = document.getElementById("noteInput").value.trim();
+    if (!note) return;
+    const minutesVal = document.getElementById("minutesInput").value;
+    const entry = {
+      id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+      date: todayStr(),
+      category: selectedCategory,
+      note: note,
+      minutes: minutesVal ? Number(minutesVal) : null,
+    };
+    const entries = loadEntries();
+    entries.unshift(entry);
+    saveEntries(entries);
+    document.getElementById("noteInput").value = "";
+    document.getElementById("minutesInput").value = "";
+    updateSubmitState();
+    render();
+  }
+
+  function deleteEntry(id) {
+    const entries = loadEntries().filter(e => e.id !== id);
+    saveEntries(entries);
+    render();
+  }
+
+  function render() {
+    const entries = loadEntries();
+
+    document.getElementById("streakNum").textContent = computeStreak(entries);
+    document.getElementById("totalNum").textContent = entries.length;
+    document.getElementById("dsaNum").textContent = entries.filter(e => e.category === "dsa").length;
+    document.getElementById("webdevNum").textContent = entries.filter(e => e.category === "webdev").length;
+
+    document.getElementById("todayLabel").textContent =
+      "Adding entry for today — " + formatDateLabel(todayStr());
+
+    const today = todayStr();
+    const alreadyToday = entries.some(e => e.date === today);
+    document.getElementById("alreadyLoggedMsg").innerHTML = alreadyToday
+      ? `<div class="already-logged">You've already logged something today — you can still add more.</div>`
+      : "";
+
+    const container = document.getElementById("entriesContainer");
+    if (entries.length === 0) {
+      container.innerHTML = `<div class="empty">Your log is empty. Add today's work above to start your streak.</div>`;
+      return;
+    }
+
+    const byDate = {};
+    entries.forEach(e => {
+      if (!byDate[e.date]) byDate[e.date] = [];
+      byDate[e.date].push(e);
+    });
+    const dates = Object.keys(byDate).sort((a, b) => (a < b ? 1 : -1));
+
+    container.innerHTML = dates.map(date => {
+      const dayEntries = byDate[date];
+      const entriesHtml = dayEntries.map(entry => {
+        const cat = CATEGORIES[entry.category];
+        return `
+          <div class="entry">
+            <div class="dot" style="background:${cat.color}"></div>
+            <div class="entry-body">
+              <div class="entry-note">${escapeHtml(entry.note)}</div>
+              <div class="entry-meta">${cat.label}${entry.minutes ? " · " + entry.minutes + " min" : ""}</div>
+            </div>
+            <button class="delete-btn" onclick="deleteEntry('${entry.id}')" aria-label="Delete entry">✕</button>
+          </div>
+        `;
+      }).join("");
+      return `
+        <div class="day-group">
+          <div class="day-label">${formatDateLabel(date)}</div>
+          ${entriesHtml}
+        </div>
+      `;
+    }).join("");
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  render();
+</script>
+</body>
+</html>
