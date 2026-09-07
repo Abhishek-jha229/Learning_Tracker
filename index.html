@@ -136,6 +136,51 @@
     color: #9AA0A6;
   }
 
+  .lookup-row {
+    margin-bottom: 20px;
+  }
+  .lookup-label {
+    display: block;
+    font-size: 12.5px;
+    color: #9AA0A6;
+    margin-bottom: 8px;
+  }
+  .lookup-controls {
+    display: flex;
+    gap: 10px;
+  }
+  .lookup-controls input[type="date"] {
+    flex: 1;
+    background: #191E23;
+    border: 1px solid #2A3138;
+    border-radius: 5px;
+    color: #ECE8E0;
+    font-family: inherit;
+    font-size: 14.5px;
+    padding: 9px 12px;
+  }
+  .clear-lookup-btn {
+    background: transparent;
+    border: 1px solid #2A3138;
+    color: #9AA0A6;
+    border-radius: 5px;
+    padding: 9px 14px;
+    font-family: inherit;
+    font-size: 13.5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .clear-lookup-btn:hover { color: #ECE8E0; border-color: #5FA8A0; }
+  .no-entries-that-day {
+    text-align: center;
+    padding: 28px 20px;
+    color: #9AA0A6;
+    font-size: 14px;
+    border: 1px dashed #2A3138;
+    border-radius: 6px;
+    margin-bottom: 22px;
+  }
+
   .day-label {
     font-size: 13px;
     color: #9AA0A6;
@@ -202,6 +247,14 @@
       <div id="alreadyLoggedMsg"></div>
     </div>
 
+    <div class="lookup-row">
+      <label class="lookup-label" for="lookupDate">Check a past date</label>
+      <div class="lookup-controls">
+        <input type="date" id="lookupDate" max="" onchange="onLookupChange()">
+        <button class="clear-lookup-btn" id="clearLookupBtn" onclick="clearLookup()" style="display:none;">Show all</button>
+      </div>
+    </div>
+
     <div id="entriesContainer"></div>
   </div>
 
@@ -213,6 +266,19 @@
   };
   const STORAGE_KEY = "learning-log-entries";
   let selectedCategory = "dsa";
+  let lookupDate = null;
+
+  function onLookupChange() {
+    const val = document.getElementById("lookupDate").value;
+    lookupDate = val || null;
+    render();
+  }
+
+  function clearLookup() {
+    lookupDate = null;
+    document.getElementById("lookupDate").value = "";
+    render();
+  }
 
   function todayStr() {
     const d = new Date();
@@ -320,14 +386,25 @@
       ? `<div class="already-logged">You've already logged something today — you can still add more.</div>`
       : "";
 
+    const lookupInput = document.getElementById("lookupDate");
+    lookupInput.max = today;
+    document.getElementById("clearLookupBtn").style.display = lookupDate ? "inline-block" : "none";
+
     const container = document.getElementById("entriesContainer");
     if (entries.length === 0) {
       container.innerHTML = `<div class="empty">Your log is empty. Add today's work above to start your streak.</div>`;
       return;
     }
 
+    const visibleEntries = lookupDate ? entries.filter(e => e.date === lookupDate) : entries;
+
+    if (lookupDate && visibleEntries.length === 0) {
+      container.innerHTML = `<div class="no-entries-that-day">No entries on ${formatDateLabel(lookupDate)}. You didn't log anything that day.</div>`;
+      return;
+    }
+
     const byDate = {};
-    entries.forEach(e => {
+    visibleEntries.forEach(e => {
       if (!byDate[e.date]) byDate[e.date] = [];
       byDate[e.date].push(e);
     });
